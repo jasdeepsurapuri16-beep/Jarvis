@@ -9,10 +9,16 @@ import os
 import threading
 import yt_dlp
 
+
 app = FastAPI(
-    title="Universal Downloader API",
-    version="1.2.0"
+    title="Facebook Video Downloader API",
+    version="1.3.0"
 )
+
+
+# ============================================================
+# CORS
+# ============================================================
 
 app.add_middleware(
     CORSMiddleware,
@@ -24,32 +30,26 @@ app.add_middleware(
     allow_headers=["Content-Type"],
 )
 
-SUPPORTED_PLATFORMS = {
-    "youtube": {
-        "youtube.com",
-        "www.youtube.com",
-        "youtu.be",
-        "m.youtube.com"
-    },
-    "facebook": {
-        "facebook.com",
-        "www.facebook.com",
-        "m.facebook.com",
-        "fb.watch"
-    },
-    "tiktok": {
-        "tiktok.com",
-        "www.tiktok.com",
-        "vm.tiktok.com"
-    }
-}
+
+# ============================================================
+# DOWNLOAD STORAGE
+# ============================================================
 
 DOWNLOAD_DIR = "/tmp/universal_downloader"
 
 os.makedirs(DOWNLOAD_DIR, exist_ok=True)
 
+
+# ============================================================
+# JOB STORAGE
+# ============================================================
+
 jobs = {}
 
+
+# ============================================================
+# REQUEST MODEL
+# ============================================================
 
 class DownloadRequest(BaseModel):
     url: HttpUrl
@@ -57,29 +57,44 @@ class DownloadRequest(BaseModel):
     permission_confirmed: bool
 
 
-def detect_platform(url: str):
+# ============================================================
+# FACEBOOK URL VALIDATION
+# ============================================================
+
+FACEBOOK_DOMAINS = {
+    "facebook.com",
+    "www.facebook.com",
+    "m.facebook.com",
+    "fb.watch"
+}
+
+
+def is_facebook_url(url: str):
     host = urlparse(url).hostname
 
     if not host:
-        return None
+        return False
 
     host = host.lower()
 
-    for platform, domains in SUPPORTED_PLATFORMS.items():
+    if host in FACEBOOK_DOMAINS:
+        return True
 
-        if host in domains:
-            return platform
+    for domain in FACEBOOK_DOMAINS:
+        if host.endswith("." + domain):
+            return True
 
-        for domain in domains:
-            if host.endswith("." + domain):
-                return platform
+    return False
 
-    return None
 
+# ============================================================
+# DOWNLOAD PROCESSOR
+# ============================================================
 
 def process_download(job_id: str, url: str):
 
     try:
+
         jobs[job_id]["status"] = "processing"
 
         output_template = os.path.join(
@@ -89,8 +104,14 @@ def process_download(job_id: str, url: str):
 
         options = {
             "outtmpl": output_template,
+
+            # Prefer MP4 when available.
             "format": "best[ext=mp4]/best",
+
+            # Only process one video.
             "noplaylist": True,
+
+            # Keep Render logs clean.
             "quiet": True,
             "no_warnings": True,
         }
@@ -104,160 +125,318 @@ def process_download(job_id: str, url: str):
 
             filename = ydl.prepare_filename(info)
 
+
+        # ----------------------------------------------------
+        # Find the downloaded file if the extension changed.
+        # ----------------------------------------------------
+
         if not os.path.exists(filename):
 
             possible_files = [
                 os.path.join(
                     DOWNLOAD_DIR,
-                    f
+                    filename_only
                 )
-                for f in os.listdir(DOWNLOAD_DIR)
-                if f.startswith(job_id + ".")
+                for filename_only in os.listdir(DOWNLOAD_DIR)
+                if filename_only.startswith(job_id + ".")
             ]
 
             if possible_files:
                 filename = possible_files[0]
 
+
+        # ----------------------------------------------------
+        # Make sure the file actually exists.
+        # ----------------------------------------------------
+
         if not os.path.exists(filename):
-            raise Exception("Downloaded file could not be located.")
+
+            raise Exception(
+                "Downloaded file could not be located."
+            )
+
+
+        # ----------------------------------------------------
+        # Successful job.
+        # ----------------------------------------------------
 
         jobs[job_id]["status"] = "completed"
+
         jobs[job_id]["file"] = filename
-        jobs[job_id]["title"] = info.get("title", "video")
+
+        jobs[job_id]["title"] = info.get(
+            "title",
+            "Facebook Video"
+        )
+
 
     except Exception as e:
 
         jobs[job_id]["status"] = "failed"
+
         jobs[job_id]["error"] = str(e)
 
 
+# ============================================================
+# ROOT
+# ============================================================
+
 @app.get("/")
 def root():
+
     return {
-        "service": "Universal Downloader API",
+        "service": "Facebook Video Downloader API",
         "status": "online",
-        "version": "1.2.0"
+        "version": "1.3.0"
     }
 
 
+# ============================================================
+# HEALTH CHECK
+# ============================================================
+
 @app.get("/api/health")
 def health():
+
     return {
         "status": "ok",
         "time": datetime.now(timezone.utc).isoformat()
     }
 
 
+# ============================================================
+# CREATE DOWNLOAD JOB
+# ============================================================
+
 @app.post("/api/download")
 def create_download(request: DownloadRequest):
 
+    # --------------------------------------------------------
+    # Permission check
+    # --------------------------------------------------------
+
     if not request.permission_confirmed:
+
         raise HTTPException(
             status_code=400,
             detail="Permission confirmation is required."
         )
 
-    detected_platform = detect_platform(str(request.url))
 
-    if not detected_platform:
+    # --------------------------------------------------------
+    # Platform check
+    # --------------------------------------------------------
+
+    if request.platform.lower() != "facebook":
+
         raise HTTPException(
             status_code=400,
-            detail="Unsupported video URL."
+            detail="Only Facebook videos are currently supported."
         )
 
-    if detected_platform != request.platform.lower():
+
+    # --------------------------------------------------------
+    # URL check
+    # --------------------------------------------------------
+
+    video_url = str(request.url)
+
+    if not is_facebook_url(video_url):
+
         raise HTTPException(
             status_code=400,
-            detail="Platform does not match the URL."
+            detail="Please provide a valid Facebook video URL."
         )
+
+
+    # --------------------------------------------------------
+    # Create job ID
+    # --------------------------------------------------------
 
     job_id = uuid.uuid4().hex
 
+
     jobs[job_id] = {
+
         "job_id": job_id,
-        "platform": detected_platform,
-        "url": str(request.url),
+
+        "platform": "facebook",
+
+        "url": video_url,
+
         "status": "queued",
-        "created_at": datetime.now(timezone.utc).isoformat()
+
+        "created_at":
+            datetime.now(timezone.utc).isoformat()
     }
 
+
+    # --------------------------------------------------------
+    # Start background download
+    # --------------------------------------------------------
+
     thread = threading.Thread(
+
         target=process_download,
-        args=(job_id, str(request.url)),
+
+        args=(
+            job_id,
+            video_url
+        ),
+
         daemon=True
     )
 
     thread.start()
 
+
+    # --------------------------------------------------------
+    # Return job information
+    # --------------------------------------------------------
+
     return {
+
         "success": True,
+
         "job_id": job_id,
-        "platform": detected_platform,
+
+        "platform": "facebook",
+
         "status": "queued",
-        "message": "Download job started."
+
+        "message":
+            "Facebook download job started."
     }
 
+
+# ============================================================
+# CHECK JOB STATUS
+# ============================================================
 
 @app.get("/api/status/{job_id}")
 def get_status(job_id: str):
 
     job = jobs.get(job_id)
 
+
     if not job:
+
         raise HTTPException(
+
             status_code=404,
+
             detail="Job not found."
         )
 
+
     response = {
+
         "success": True,
-        "job_id": job["job_id"],
-        "platform": job["platform"],
-        "status": job["status"],
-        "created_at": job["created_at"]
+
+        "job_id":
+            job["job_id"],
+
+        "platform":
+            job["platform"],
+
+        "status":
+            job["status"],
+
+        "created_at":
+            job["created_at"]
     }
 
+
+    # --------------------------------------------------------
+    # Add title when available.
+    # --------------------------------------------------------
+
     if "title" in job:
+
         response["title"] = job["title"]
 
+
+    # --------------------------------------------------------
+    # Add error when download fails.
+    # --------------------------------------------------------
+
     if "error" in job:
+
         response["error"] = job["error"]
 
+
+    # --------------------------------------------------------
+    # Add download URL when complete.
+    # --------------------------------------------------------
+
     if job["status"] == "completed":
+
         response["download_url"] = (
             f"/api/file/{job_id}"
         )
 
+
     return response
 
+
+# ============================================================
+# DOWNLOAD COMPLETED FILE
+# ============================================================
 
 @app.get("/api/file/{job_id}")
 def download_file(job_id: str):
 
     job = jobs.get(job_id)
 
+
     if not job:
+
         raise HTTPException(
+
             status_code=404,
+
             detail="Job not found."
         )
 
+
     if job["status"] != "completed":
+
         raise HTTPException(
+
             status_code=400,
+
             detail="File is not ready."
         )
 
+
     filename = job.get("file")
 
-    if not filename or not os.path.exists(filename):
+
+    if not filename:
+
         raise HTTPException(
+
             status_code=404,
+
+            detail="Downloaded file was not found."
+        )
+
+
+    if not os.path.exists(filename):
+
+        raise HTTPException(
+
+            status_code=404,
+
             detail="Downloaded file no longer exists."
         )
 
+
     return FileResponse(
+
         filename,
+
         filename=os.path.basename(filename),
+
         media_type="application/octet-stream"
     )
