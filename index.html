@@ -4,10 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#080a0f">
-<meta name="description" content="Universal Video Downloader">
-<title>Universal Video Downloader</title>
+<meta name="description" content="Facebook Video Downloader">
+<title>Facebook Video Downloader</title>
 
 <style>
+
 * {
     box-sizing: border-box;
     margin: 0;
@@ -18,6 +19,7 @@ body {
     font-family: Arial, Helvetica, sans-serif;
     min-height: 100vh;
     color: #fff;
+
     background:
         radial-gradient(
             circle at 15% 10%,
@@ -37,7 +39,10 @@ body {
     margin: auto;
 }
 
-/* HEADER */
+
+/* =========================
+   HEADER
+========================= */
 
 header {
     padding: 22px 0;
@@ -54,6 +59,7 @@ header {
     display: flex;
     align-items: center;
     gap: 10px;
+
     font-size: 20px;
     font-weight: 800;
 }
@@ -61,79 +67,141 @@ header {
 .logo-icon {
     width: 40px;
     height: 40px;
+
     display: grid;
     place-items: center;
+
     border-radius: 12px;
+
     font-size: 23px;
-    background: linear-gradient(135deg,#00e5ff,#7c3aed);
-    box-shadow: 0 0 25px rgba(0,229,255,0.25);
+
+    background:
+        linear-gradient(
+            135deg,
+            #00e5ff,
+            #7c3aed
+        );
+
+    box-shadow:
+        0 0 25px rgba(0,229,255,0.25);
 }
 
 .badge {
     padding: 7px 12px;
+
     border-radius: 20px;
+
     font-size: 11px;
+
     color: #adb5c4;
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.08);
+
+    background:
+        rgba(255,255,255,0.05);
+
+    border:
+        1px solid rgba(255,255,255,0.08);
 }
 
-/* HERO */
+
+/* =========================
+   HERO
+========================= */
 
 .hero {
     text-align: center;
+
     padding: 75px 0 35px;
 }
 
 .hero h1 {
-    font-size: clamp(40px, 7vw, 72px);
+    font-size:
+        clamp(40px, 7vw, 72px);
+
     line-height: 1;
+
     letter-spacing: -3px;
+
     margin-bottom: 20px;
 }
 
 .gradient {
-    background: linear-gradient(90deg,#00e5ff,#8b5cf6);
+    background:
+        linear-gradient(
+            90deg,
+            #00e5ff,
+            #8b5cf6
+        );
+
     -webkit-background-clip: text;
     background-clip: text;
+
     color: transparent;
 }
 
 .hero p {
     max-width: 650px;
+
     margin: auto;
+
     color: #9ca5b5;
+
     line-height: 1.6;
+
     font-size: 17px;
 }
 
-/* DOWNLOADER */
+
+/* =========================
+   DOWNLOADER
+========================= */
 
 .downloader {
     max-width: 800px;
-    margin: 32px auto 0;
+
+    margin:
+        32px auto 0;
+
     padding: 10px;
+
     border-radius: 22px;
-    background: rgba(255,255,255,0.045);
-    border: 1px solid rgba(255,255,255,0.1);
-    backdrop-filter: blur(20px);
+
+    background:
+        rgba(255,255,255,0.045);
+
+    border:
+        1px solid rgba(255,255,255,0.1);
+
+    backdrop-filter:
+        blur(20px);
 }
 
 .input-row {
     display: flex;
+
     gap: 10px;
 }
 
 .url-input {
     flex: 1;
+
     min-width: 0;
+
     height: 56px;
-    padding: 0 18px;
+
+    padding:
+        0 18px;
+
     border: 0;
+
     outline: none;
+
     border-radius: 14px;
+
     color: #fff;
-    background: #11141b;
+
+    background:
+        #11141b;
+
     font-size: 16px;
 }
 
@@ -141,73 +209,129 @@ header {
     color: #687180;
 }
 
+
+/* =========================
+   BUTTONS
+========================= */
+
 button {
     border: 0;
+
     cursor: pointer;
+
     font-weight: 700;
-    transition: 0.2s ease;
+
+    transition:
+        0.2s ease;
 }
 
 .paste-btn {
     height: 56px;
-    padding: 0 18px;
+
+    padding:
+        0 18px;
+
     border-radius: 14px;
+
     color: #dce1e8;
-    background: #1b202a;
+
+    background:
+        #1b202a;
 }
 
 .paste-btn:hover {
-    background: #272e3a;
+    background:
+        #272e3a;
 }
 
 .download-btn {
     height: 56px;
-    padding: 0 24px;
+
+    padding:
+        0 24px;
+
     border-radius: 14px;
+
     color: #fff;
-    background: linear-gradient(135deg,#00bcd4,#7c3aed);
-    box-shadow: 0 8px 25px rgba(0,229,255,0.12);
+
+    background:
+        linear-gradient(
+            135deg,
+            #00bcd4,
+            #7c3aed
+        );
+
+    box-shadow:
+        0 8px 25px
+        rgba(0,229,255,0.12);
 }
 
 .download-btn:hover:not(:disabled) {
-    transform: translateY(-1px);
-    box-shadow: 0 10px 30px rgba(124,58,237,0.3);
+    transform:
+        translateY(-1px);
+
+    box-shadow:
+        0 10px 30px
+        rgba(124,58,237,0.3);
 }
 
 .download-btn:disabled {
     opacity: 0.65;
+
     cursor: wait;
 }
 
-/* PLATFORMS */
+
+/* =========================
+   PLATFORM
+========================= */
 
 .platforms {
     display: flex;
+
     justify-content: center;
-    flex-wrap: wrap;
-    gap: 10px;
+
     margin-top: 20px;
 }
 
 .platform {
-    padding: 9px 14px;
+    padding:
+        9px 16px;
+
     border-radius: 30px;
+
     color: #b8c0cc;
-    background: rgba(255,255,255,0.045);
-    border: 1px solid rgba(255,255,255,0.07);
+
+    background:
+        rgba(255,255,255,0.045);
+
+    border:
+        1px solid rgba(255,255,255,0.07);
+
     font-size: 13px;
 }
 
-/* VERIFICATION */
+
+/* =========================
+   VERIFICATION
+========================= */
 
 .verification {
     display: none;
+
     margin-top: 15px;
+
     padding: 18px;
+
     text-align: left;
+
     border-radius: 15px;
-    background: rgba(255,255,255,0.035);
-    border: 1px solid rgba(255,255,255,0.08);
+
+    background:
+        rgba(255,255,255,0.035);
+
+    border:
+        1px solid rgba(255,255,255,0.08);
 }
 
 .verification.active {
@@ -216,32 +340,54 @@ button {
 
 .verification label {
     display: flex;
-    align-items: flex-start;
+
+    align-items:
+        flex-start;
+
     gap: 12px;
+
     color: #c7cdd7;
+
     font-size: 14px;
+
     line-height: 1.5;
+
     cursor: pointer;
 }
 
 .verification input {
     width: 18px;
+
     height: 18px;
+
     margin-top: 2px;
+
     flex-shrink: 0;
+
     cursor: pointer;
-    accent-color: #00d9ff;
+
+    accent-color:
+        #00d9ff;
 }
 
-/* STATUS */
+
+/* =========================
+   STATUS
+========================= */
 
 .status {
     display: none;
+
     margin-top: 15px;
+
     padding: 15px;
+
     border-radius: 14px;
+
     text-align: center;
+
     font-size: 14px;
+
     line-height: 1.5;
 }
 
@@ -251,80 +397,209 @@ button {
 
 .status.info {
     color: #75eaff;
-    background: rgba(0,188,212,0.08);
-    border: 1px solid rgba(0,188,212,0.2);
+
+    background:
+        rgba(0,188,212,0.08);
+
+    border:
+        1px solid rgba(0,188,212,0.2);
 }
 
 .status.success {
     color: #8ff0b2;
-    background: rgba(34,197,94,0.08);
-    border: 1px solid rgba(34,197,94,0.2);
+
+    background:
+        rgba(34,197,94,0.08);
+
+    border:
+        1px solid rgba(34,197,94,0.2);
 }
 
 .status.error {
     color: #ff9b9b;
-    background: rgba(239,68,68,0.08);
-    border: 1px solid rgba(239,68,68,0.2);
+
+    background:
+        rgba(239,68,68,0.08);
+
+    border:
+        1px solid rgba(239,68,68,0.2);
 }
 
-/* FEATURES */
+
+/* =========================
+   DOWNLOAD RESULT
+========================= */
+
+.result {
+    display: none;
+
+    margin-top: 15px;
+
+    padding: 18px;
+
+    border-radius: 15px;
+
+    text-align: center;
+
+    background:
+        rgba(34,197,94,0.06);
+
+    border:
+        1px solid rgba(34,197,94,0.2);
+}
+
+.result.active {
+    display: block;
+}
+
+.result-title {
+    color: #c7ffda;
+
+    font-size: 15px;
+
+    margin-bottom: 12px;
+
+    line-height: 1.4;
+}
+
+.download-file-btn {
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 8px;
+
+    min-height: 48px;
+
+    padding:
+        0 22px;
+
+    border-radius: 12px;
+
+    color: #fff;
+
+    background:
+        linear-gradient(
+            135deg,
+            #16a34a,
+            #059669
+        );
+
+    text-decoration: none;
+
+    font-weight: 700;
+
+    transition:
+        0.2s ease;
+}
+
+.download-file-btn:hover {
+    transform:
+        translateY(-1px);
+}
+
+
+/* =========================
+   FEATURES
+========================= */
 
 .features {
     display: grid;
-    grid-template-columns: repeat(3,1fr);
+
+    grid-template-columns:
+        repeat(3,1fr);
+
     gap: 15px;
+
     margin: 70px 0;
 }
 
 .feature {
     padding: 25px;
+
     border-radius: 18px;
-    background: rgba(255,255,255,0.035);
-    border: 1px solid rgba(255,255,255,0.07);
+
+    background:
+        rgba(255,255,255,0.035);
+
+    border:
+        1px solid rgba(255,255,255,0.07);
 }
 
 .feature-icon {
     font-size: 27px;
+
     margin-bottom: 15px;
 }
 
 .feature h3 {
     margin-bottom: 8px;
+
     font-size: 17px;
 }
 
 .feature p {
     color: #858e9d;
+
     font-size: 14px;
+
     line-height: 1.5;
 }
 
-/* NOTICE */
+
+/* =========================
+   NOTICE
+========================= */
 
 .notice {
     max-width: 800px;
-    margin: 0 auto 60px;
+
+    margin:
+        0 auto 60px;
+
     padding: 18px;
+
     border-radius: 15px;
+
     text-align: center;
+
     color: #858e9d;
+
     font-size: 12px;
+
     line-height: 1.6;
-    background: rgba(255,255,255,0.025);
-    border: 1px solid rgba(255,255,255,0.06);
+
+    background:
+        rgba(255,255,255,0.025);
+
+    border:
+        1px solid rgba(255,255,255,0.06);
 }
 
-/* FOOTER */
+
+/* =========================
+   FOOTER
+========================= */
 
 footer {
     padding: 25px 0;
+
     text-align: center;
+
     color: #626a78;
+
     font-size: 12px;
-    border-top: 1px solid rgba(255,255,255,0.07);
+
+    border-top:
+        1px solid rgba(255,255,255,0.07);
 }
 
-/* MOBILE */
+
+/* =========================
+   MOBILE
+========================= */
 
 @media(max-width:700px) {
 
@@ -347,6 +622,7 @@ footer {
 
     .features {
         grid-template-columns: 1fr;
+
         margin-top: 45px;
     }
 
@@ -354,83 +630,109 @@ footer {
         display: none;
     }
 }
+
 </style>
 </head>
 
+
 <body>
 
+
 <header>
+
     <div class="container nav">
 
         <div class="logo">
-            <div class="logo-icon">↓</div>
-            <span>Universal Downloader</span>
+
+            <div class="logo-icon">
+                ↓
+            </div>
+
+            <span>
+                Facebook Downloader
+            </span>
+
         </div>
 
         <div class="badge">
-            Simple • Fast • Secure
+            Fast • Simple • Secure
         </div>
 
     </div>
+
 </header>
 
+
+
 <main class="container">
+
 
 <section class="hero">
 
     <h1>
         Download Your<br>
-        <span class="gradient">Videos</span>
+
+        <span class="gradient">
+            Facebook Videos
+        </span>
     </h1>
 
+
     <p>
-        Enter a supported video URL and we'll help you access
+        Paste a Facebook video URL and download
         content you're authorized to download.
     </p>
 
+
+
     <div class="downloader">
 
+
         <div class="input-row">
+
 
             <input
                 id="urlInput"
                 class="url-input"
                 type="url"
-                placeholder="Paste video URL here..."
+                placeholder="Paste Facebook video URL here..."
                 autocomplete="off"
             >
+
 
             <button
                 class="paste-btn"
                 id="pasteBtn"
                 type="button">
+
                 Paste
+
             </button>
+
 
             <button
                 class="download-btn"
                 id="downloadBtn"
                 type="button">
+
                 Download
+
             </button>
+
 
         </div>
 
-        <div class="platforms">
 
-            <div class="platform">
-                ▶ YouTube
-            </div>
+
+        <div class="platforms">
 
             <div class="platform">
                 f Facebook
             </div>
 
-            <div class="platform">
-                ♪ TikTok
-            </div>
-
         </div>
+
+
 
         <div
             class="verification"
@@ -444,26 +746,54 @@ footer {
                 >
 
                 <span>
-                    I confirm that I own this video or have
-                    permission from the copyright owner to
-                    download it.
+                    I confirm that I own this video or
+                    have permission from the copyright
+                    owner to download it.
                 </span>
 
             </label>
 
         </div>
 
+
+
         <div
             class="status"
             id="status">
         </div>
+
+
+
+        <div
+            class="result"
+            id="result">
+
+            <div
+                class="result-title"
+                id="resultTitle">
+            </div>
+
+
+            <a
+                id="downloadFileBtn"
+                class="download-file-btn"
+                href="#">
+
+                ↓ Download Video
+
+            </a>
+
+        </div>
+
 
     </div>
 
 </section>
 
 
+
 <section class="features">
+
 
     <div class="feature">
 
@@ -476,11 +806,12 @@ footer {
         </h3>
 
         <p>
-            A simple interface designed to make the process
-            quick and easy.
+            Simple processing with no unnecessary
+            steps for the user.
         </p>
 
     </div>
+
 
 
     <div class="feature">
@@ -494,11 +825,12 @@ footer {
         </h3>
 
         <p>
-            Downloads require confirmation that you have
-            the necessary rights or permission.
+            Downloads require confirmation that
+            you have the necessary rights.
         </p>
 
     </div>
+
 
 
     <div class="feature">
@@ -508,195 +840,228 @@ footer {
         </div>
 
         <h3>
-            Works Everywhere
+            Mobile Friendly
         </h3>
 
         <p>
-            Designed for phones, tablets and desktop browsers.
+            Designed to work on phones, tablets,
+            and desktop browsers.
         </p>
 
     </div>
 
+
 </section>
+
 
 
 <div class="notice">
 
-    Only download videos that you own or have permission
-    to download. This service does not bypass DRM,
-    private-content restrictions, authentication controls,
-    or other technical access restrictions.
+    Only download videos that you own or have
+    permission to download. This service does not
+    bypass DRM, private-content restrictions,
+    authentication controls, or other technical
+    access restrictions.
 
 </div>
+
 
 </main>
 
 
+
 <footer>
 
-    © 2026 Universal Downloader
+    © 2026 Facebook Downloader
 
 </footer>
 
 
+
 <script>
 
-/*
-====================================================
-LIVE BACKEND
-====================================================
-*/
 
-const API_URL =
-    "https://jarvis-iu3f.onrender.com/api/download";
+/* ==========================================================
+   CONFIGURATION
+========================================================== */
+
+const API_BASE =
+    "https://jarvis-iu3f.onrender.com";
 
 
-/*
-====================================================
-ELEMENTS
-====================================================
-*/
+const DOWNLOAD_API =
+    API_BASE + "/api/download";
+
+
+/* ==========================================================
+   ELEMENTS
+========================================================== */
 
 const urlInput =
     document.getElementById("urlInput");
 
+
 const pasteBtn =
     document.getElementById("pasteBtn");
+
 
 const downloadBtn =
     document.getElementById("downloadBtn");
 
+
 const verification =
     document.getElementById("verification");
 
+
 const permissionCheck =
     document.getElementById("permissionCheck");
+
 
 const status =
     document.getElementById("status");
 
 
-/*
-====================================================
-PLATFORM DETECTION
-====================================================
-*/
-
-function detectPlatform(url) {
-
-    const value = url.toLowerCase();
-
-    if (
-        value.includes("youtube.com") ||
-        value.includes("youtu.be")
-    ) {
-        return "YouTube";
-    }
-
-    if (
-        value.includes("facebook.com") ||
-        value.includes("fb.watch")
-    ) {
-        return "Facebook";
-    }
-
-    if (
-        value.includes("tiktok.com")
-    ) {
-        return "TikTok";
-    }
-
-    return null;
-}
+const result =
+    document.getElementById("result");
 
 
-/*
-====================================================
-STATUS MESSAGE
-====================================================
-*/
+const resultTitle =
+    document.getElementById("resultTitle");
+
+
+const downloadFileBtn =
+    document.getElementById("downloadFileBtn");
+
+
+/* ==========================================================
+   STATUS
+========================================================== */
 
 function showStatus(
     message,
     type = "info"
 ) {
 
-    status.textContent = message;
+    status.textContent =
+        message;
 
     status.className =
         "status active " + type;
 }
 
 
-/*
-====================================================
-CHECK URL
-====================================================
-*/
+/* ==========================================================
+   CLEAR RESULT
+========================================================== */
 
-function checkUrl() {
+function clearResult() {
 
-    const url =
-        urlInput.value.trim();
+    result.className =
+        "result";
 
-    if (!url) {
+    resultTitle.textContent =
+        "";
 
-        verification.classList.remove("active");
-
-        status.className =
-            "status";
-
-        return;
-    }
-
-
-    const platform =
-        detectPlatform(url);
-
-
-    if (!platform) {
-
-        verification.classList.remove("active");
-
-        showStatus(
-            "Please enter a supported YouTube, Facebook, or TikTok URL.",
-            "error"
-        );
-
-        return;
-    }
-
-
-    verification.classList.add("active");
-
-    permissionCheck.checked = false;
-
-
-    showStatus(
-        platform +
-        " URL detected. Please confirm your download permission.",
-        "info"
-    );
+    downloadFileBtn.href =
+        "#";
 }
 
 
-/*
-====================================================
-URL INPUT
-====================================================
-*/
+/* ==========================================================
+   FACEBOOK URL CHECK
+========================================================== */
+
+function isFacebookUrl(url) {
+
+    try {
+
+        const parsed =
+            new URL(url);
+
+        const host =
+            parsed.hostname.toLowerCase();
+
+
+        return (
+            host === "facebook.com" ||
+            host === "www.facebook.com" ||
+            host === "m.facebook.com" ||
+            host === "fb.watch" ||
+            host.endsWith(".facebook.com")
+        );
+
+    }
+
+    catch {
+
+        return false;
+
+    }
+}
+
+
+/* ==========================================================
+   URL INPUT
+========================================================== */
 
 urlInput.addEventListener(
     "input",
-    checkUrl
+    () => {
+
+        clearResult();
+
+        const url =
+            urlInput.value.trim();
+
+
+        if (!url) {
+
+            verification.classList.remove(
+                "active"
+            );
+
+            status.className =
+                "status";
+
+            return;
+        }
+
+
+        if (!isFacebookUrl(url)) {
+
+            verification.classList.remove(
+                "active"
+            );
+
+            showStatus(
+                "Please enter a valid Facebook video URL.",
+                "error"
+            );
+
+            return;
+        }
+
+
+        verification.classList.add(
+            "active"
+        );
+
+        permissionCheck.checked =
+            false;
+
+
+        showStatus(
+            "Facebook URL detected. Please confirm your download permission.",
+            "info"
+        );
+
+    }
 );
 
 
-/*
-====================================================
-PASTE BUTTON
-====================================================
-*/
+/* ==========================================================
+   PASTE
+========================================================== */
 
 pasteBtn.addEventListener(
     "click",
@@ -719,9 +1084,13 @@ pasteBtn.addEventListener(
             }
 
 
-            urlInput.value = text;
+            urlInput.value =
+                text;
 
-            checkUrl();
+
+            urlInput.dispatchEvent(
+                new Event("input")
+            );
 
         }
 
@@ -738,115 +1107,271 @@ pasteBtn.addEventListener(
 );
 
 
-/*
-====================================================
-DOWNLOAD / BACKEND REQUEST
-====================================================
-*/
+/* ==========================================================
+   WAIT FOR JOB
+========================================================== */
 
-downloadBtn.addEventListener(
-    "click",
-    async () => {
+async function waitForJob(
+    jobId
+) {
 
-        const url =
-            urlInput.value.trim();
+    const maxAttempts =
+        120;
 
-
-        /*
-        -------------------------------
-        URL CHECK
-        -------------------------------
-        */
-
-        if (!url) {
-
-            showStatus(
-                "Please paste a video URL first.",
-                "error"
-            );
-
-            return;
-        }
+    const delay =
+        2000;
 
 
-        /*
-        -------------------------------
-        PLATFORM CHECK
-        -------------------------------
-        */
+    for (
+        let attempt = 0;
+        attempt < maxAttempts;
+        attempt++
+    ) {
 
-        const platform =
-            detectPlatform(url);
-
-
-        if (!platform) {
-
-            showStatus(
-                "Only supported YouTube, Facebook, and TikTok URLs are accepted.",
-                "error"
-            );
-
-            return;
-        }
-
-
-        /*
-        -------------------------------
-        SHOW PERMISSION
-        -------------------------------
-        */
-
-        verification.classList.add(
-            "active"
-        );
-
-
-        /*
-        -------------------------------
-        PERMISSION REQUIRED
-        -------------------------------
-        */
-
-        if (!permissionCheck.checked) {
-
-            showStatus(
-                "Please confirm that you own the video or have permission to download it.",
-                "error"
-            );
-
-            return;
-        }
-
-
-        /*
-        -------------------------------
-        CONNECTING
-        -------------------------------
-        */
-
-        downloadBtn.disabled = true;
-
-        downloadBtn.textContent =
-            "Connecting...";
-
-
-        showStatus(
-            "Connecting to the download server...",
-            "info"
-        );
-
-
-        /*
-        -------------------------------
-        SEND REQUEST
-        -------------------------------
-        */
 
         try {
 
             const response =
                 await fetch(
-                    API_URL,
+                    API_BASE +
+                    "/api/status/" +
+                    encodeURIComponent(jobId)
+                );
+
+
+            const data =
+                await response.json();
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    data.detail ||
+                    "Unable to check download status."
+                );
+
+            }
+
+
+            /* =========================
+               PROCESSING
+            ========================= */
+
+            if (
+                data.status ===
+                "processing"
+            ) {
+
+                showStatus(
+                    "Downloading your video… Please wait.",
+                    "info"
+                );
+
+            }
+
+
+            /* =========================
+               QUEUED
+            ========================= */
+
+            else if (
+                data.status ===
+                "queued"
+            ) {
+
+                showStatus(
+                    "Your video is queued for processing…",
+                    "info"
+                );
+
+            }
+
+
+            /* =========================
+               COMPLETED
+            ========================= */
+
+            else if (
+                data.status ===
+                "completed"
+            ) {
+
+
+                if (!data.download_url) {
+
+                    throw new Error(
+                        "The server completed the job but did not provide a download link."
+                    );
+
+                }
+
+
+                const fileUrl =
+                    API_BASE +
+                    data.download_url;
+
+
+                resultTitle.textContent =
+                    data.title
+                    ? "Ready: " + data.title
+                    : "Your video is ready.";
+
+
+                downloadFileBtn.href =
+                    fileUrl;
+
+
+                result.className =
+                    "result active";
+
+
+                showStatus(
+                    "Video ready! Click Download Video below.",
+                    "success"
+                );
+
+
+                return;
+
+            }
+
+
+            /* =========================
+               FAILED
+            ========================= */
+
+            else if (
+                data.status ===
+                "failed"
+            ) {
+
+                throw new Error(
+                    data.error ||
+                    "The video could not be downloaded."
+                );
+
+            }
+
+        }
+
+        catch (error) {
+
+            throw error;
+
+        }
+
+
+        await new Promise(
+            resolve =>
+                setTimeout(
+                    resolve,
+                    delay
+                )
+        );
+
+    }
+
+
+    throw new Error(
+        "The download is taking too long. Please try again."
+    );
+}
+
+
+/* ==========================================================
+   DOWNLOAD BUTTON
+========================================================== */
+
+downloadBtn.addEventListener(
+    "click",
+    async () => {
+
+        clearResult();
+
+
+        const url =
+            urlInput.value.trim();
+
+
+        /* =========================
+           URL REQUIRED
+        ========================= */
+
+        if (!url) {
+
+            showStatus(
+                "Please paste a Facebook video URL first.",
+                "error"
+            );
+
+            return;
+
+        }
+
+
+        /* =========================
+           FACEBOOK CHECK
+        ========================= */
+
+        if (!isFacebookUrl(url)) {
+
+            showStatus(
+                "Please enter a valid Facebook video URL.",
+                "error"
+            );
+
+            return;
+
+        }
+
+
+        /* =========================
+           PERMISSION CHECK
+        ========================= */
+
+        if (!permissionCheck.checked) {
+
+            verification.classList.add(
+                "active"
+            );
+
+            showStatus(
+                "Please confirm that you have permission to download this video.",
+                "error"
+            );
+
+            return;
+
+        }
+
+
+        /* =========================
+           DISABLE BUTTON
+        ========================= */
+
+        downloadBtn.disabled =
+            true;
+
+        downloadBtn.textContent =
+            "Processing...";
+
+
+        try {
+
+
+            showStatus(
+                "Sending your request…",
+                "info"
+            );
+
+
+            /* =========================
+               CREATE JOB
+            ========================= */
+
+            const response =
+                await fetch(
+                    DOWNLOAD_API,
                     {
                         method: "POST",
 
@@ -855,50 +1380,25 @@ downloadBtn.addEventListener(
                                 "application/json"
                         },
 
-                        body: JSON.stringify({
+                        body:
+                            JSON.stringify({
 
-                            url: url,
+                                url: url,
 
-                            platform: platform,
+                                platform:
+                                    "facebook",
 
-                            permission_confirmed:
-                                true
+                                permission_confirmed:
+                                    true
 
-                        })
+                            })
                     }
                 );
 
 
-            /*
-            -------------------------------
-            READ SERVER RESPONSE
-            -------------------------------
-            */
+            const data =
+                await response.json();
 
-            let data;
-
-
-            try {
-
-                data =
-                    await response.json();
-
-            }
-
-            catch {
-
-                throw new Error(
-                    "The server returned an invalid response."
-                );
-
-            }
-
-
-            /*
-            -------------------------------
-            SERVER ERROR
-            -------------------------------
-            */
 
             if (!response.ok) {
 
@@ -910,44 +1410,49 @@ downloadBtn.addEventListener(
             }
 
 
-            /*
-            -------------------------------
-            SUCCESS
-            -------------------------------
-            */
+            if (!data.job_id) {
 
-            showStatus(
-                "Request accepted! Job ID: " +
-                data.job_id,
-                "success"
+                throw new Error(
+                    "The server did not return a job ID."
+                );
+
+            }
+
+
+            /* =========================
+               IMPORTANT
+               
+               The user never sees this
+               Job ID.
+            ========================= */
+
+            await waitForJob(
+                data.job_id
             );
 
-
-            console.log(
-                "Backend response:",
-                data
-            );
 
         }
 
         catch (error) {
 
             console.error(
-                "Download API error:",
                 error
             );
 
 
             showStatus(
-                "Unable to connect to the download server. Please try again.",
+                error.message ||
+                "Something went wrong while downloading the video.",
                 "error"
             );
 
         }
 
+
         finally {
 
-            downloadBtn.disabled = false;
+            downloadBtn.disabled =
+                false;
 
             downloadBtn.textContent =
                 "Download";
