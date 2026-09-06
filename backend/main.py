@@ -1,787 +1,148 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#080a0f">
-<meta name="description" content="Universal Video Downloader">
-<title>Universal Video Downloader</title>
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel, HttpUrl
+from urllib.parse import urlparse
+from datetime import datetime, timezone
+import uuid
 
-<style>
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
+app = FastAPI(
+    title="Universal Downloader API",
+    version="1.1.0"
+)
 
-body {
-    font-family: Arial, Helvetica, sans-serif;
-    min-height: 100vh;
-    color: #fff;
-    background:
-        radial-gradient(circle at 15% 10%, rgba(0,229,255,.13), transparent 30%),
-        radial-gradient(circle at 85% 15%, rgba(124,58,237,.16), transparent 30%),
-        #080a0f;
-}
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "https://jasdeepsurapuri16-beep.github.io"
+    ],
+    allow_credentials=False,
+    allow_methods=["GET", "POST"],
+    allow_headers=["Content-Type"],
+)
 
-.container {
-    width: min(100% - 32px, 1050px);
-    margin: auto;
-}
 
-header {
-    padding: 22px 0;
-    border-bottom: 1px solid rgba(255,255,255,.08);
-}
-
-.nav {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.logo {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 20px;
-    font-weight: 800;
-}
-
-.logo-icon {
-    width: 40px;
-    height: 40px;
-    display: grid;
-    place-items: center;
-    border-radius: 12px;
-    font-size: 23px;
-    background: linear-gradient(135deg,#00e5ff,#7c3aed);
-    box-shadow: 0 0 25px rgba(0,229,255,.25);
-}
-
-.badge {
-    padding: 7px 12px;
-    border-radius: 20px;
-    font-size: 11px;
-    color: #adb5c4;
-    background: rgba(255,255,255,.05);
-    border: 1px solid rgba(255,255,255,.08);
-}
-
-.hero {
-    text-align: center;
-    padding: 75px 0 35px;
-}
-
-.hero h1 {
-    font-size: clamp(40px,7vw,72px);
-    line-height: 1;
-    letter-spacing: -3px;
-    margin-bottom: 20px;
-}
-
-.gradient {
-    background: linear-gradient(90deg,#00e5ff,#8b5cf6);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-}
-
-.hero p {
-    max-width: 650px;
-    margin: auto;
-    color: #9ca5b5;
-    line-height: 1.6;
-    font-size: 17px;
-}
-
-.downloader {
-    max-width: 800px;
-    margin: 32px auto 0;
-    padding: 10px;
-    border-radius: 22px;
-    background: rgba(255,255,255,.045);
-    border: 1px solid rgba(255,255,255,.1);
-    backdrop-filter: blur(20px);
-}
-
-.input-row {
-    display: flex;
-    gap: 10px;
-}
-
-.url-input {
-    flex: 1;
-    min-width: 0;
-    height: 56px;
-    padding: 0 18px;
-    border: 0;
-    outline: none;
-    border-radius: 14px;
-    color: #fff;
-    background: #11141b;
-    font-size: 16px;
-}
-
-.url-input::placeholder {
-    color: #687180;
-}
-
-button {
-    border: 0;
-    cursor: pointer;
-    font-weight: 700;
-    transition: .2s ease;
-}
-
-.paste-btn {
-    height: 56px;
-    padding: 0 18px;
-    border-radius: 14px;
-    color: #dce1e8;
-    background: #1b202a;
-}
-
-.paste-btn:hover {
-    background: #272e3a;
-}
-
-.download-btn {
-    height: 56px;
-    padding: 0 24px;
-    border-radius: 14px;
-    color: #fff;
-    background: linear-gradient(135deg,#00bcd4,#7c3aed);
-    box-shadow: 0 8px 25px rgba(0,229,255,.12);
-}
-
-.download-btn:hover:not(:disabled) {
-    transform: translateY(-1px);
-    box-shadow: 0 10px 30px rgba(124,58,237,.3);
-}
-
-.download-btn:disabled {
-    opacity: .65;
-    cursor: wait;
-}
-
-.platforms {
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-top: 20px;
-}
-
-.platform {
-    padding: 9px 14px;
-    border-radius: 30px;
-    color: #b8c0cc;
-    background: rgba(255,255,255,.045);
-    border: 1px solid rgba(255,255,255,.07);
-    font-size: 13px;
-}
-
-.verification {
-    display: none;
-    margin-top: 15px;
-    padding: 18px;
-    text-align: left;
-    border-radius: 15px;
-    background: rgba(255,255,255,.035);
-    border: 1px solid rgba(255,255,255,.08);
-}
-
-.verification.active {
-    display: block;
-}
-
-.verification label {
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    color: #c7cdd7;
-    font-size: 14px;
-    line-height: 1.5;
-    cursor: pointer;
-}
-
-.verification input {
-    width: 18px;
-    height: 18px;
-    margin-top: 2px;
-    flex-shrink: 0;
-    cursor: pointer;
-    accent-color: #00d9ff;
-}
-
-.status {
-    display: none;
-    margin-top: 15px;
-    padding: 15px;
-    border-radius: 14px;
-    text-align: center;
-    font-size: 14px;
-    line-height: 1.5;
-}
-
-.status.active {
-    display: block;
-}
-
-.status.info {
-    color: #75eaff;
-    background: rgba(0,188,212,.08);
-    border: 1px solid rgba(0,188,212,.2);
-}
-
-.status.success {
-    color: #8ff0b2;
-    background: rgba(34,197,94,.08);
-    border: 1px solid rgba(34,197,94,.2);
-}
-
-.status.error {
-    color: #ff9b9b;
-    background: rgba(239,68,68,.08);
-    border: 1px solid rgba(239,68,68,.2);
-}
-
-.features {
-    display: grid;
-    grid-template-columns: repeat(3,1fr);
-    gap: 15px;
-    margin: 70px 0;
-}
-
-.feature {
-    padding: 25px;
-    border-radius: 18px;
-    background: rgba(255,255,255,.035);
-    border: 1px solid rgba(255,255,255,.07);
-}
-
-.feature-icon {
-    font-size: 27px;
-    margin-bottom: 15px;
-}
-
-.feature h3 {
-    margin-bottom: 8px;
-    font-size: 17px;
-}
-
-.feature p {
-    color: #858e9d;
-    font-size: 14px;
-    line-height: 1.5;
-}
-
-.notice {
-    max-width: 800px;
-    margin: 0 auto 60px;
-    padding: 18px;
-    border-radius: 15px;
-    text-align: center;
-    color: #858e9d;
-    font-size: 12px;
-    line-height: 1.6;
-    background: rgba(255,255,255,.025);
-    border: 1px solid rgba(255,255,255,.06);
-}
-
-footer {
-    padding: 25px 0;
-    text-align: center;
-    color: #626a78;
-    font-size: 12px;
-    border-top: 1px solid rgba(255,255,255,.07);
-}
-
-@media (max-width:700px) {
-
-    .hero {
-        padding-top: 55px;
-    }
-
-    .hero h1 {
-        letter-spacing: -2px;
-    }
-
-    .input-row {
-        flex-direction: column;
-    }
-
-    .paste-btn,
-    .download-btn {
-        width: 100%;
-    }
-
-    .features {
-        grid-template-columns: 1fr;
-        margin-top: 45px;
-    }
-
-    .badge {
-        display: none;
+SUPPORTED_PLATFORMS = {
+    "youtube": {
+        "youtube.com",
+        "www.youtube.com",
+        "youtu.be",
+        "m.youtube.com"
+    },
+    "facebook": {
+        "facebook.com",
+        "www.facebook.com",
+        "m.facebook.com",
+        "fb.watch"
+    },
+    "tiktok": {
+        "tiktok.com",
+        "www.tiktok.com",
+        "vm.tiktok.com"
     }
 }
-</style>
-</head>
 
-<body>
 
-<header>
-    <div class="container nav">
+class DownloadRequest(BaseModel):
+    url: HttpUrl
+    platform: str
+    permission_confirmed: bool
 
-        <div class="logo">
-            <div class="logo-icon">↓</div>
-            <span>Universal Downloader</span>
-        </div>
 
-        <div class="badge">
-            Simple • Fast • Secure
-        </div>
+jobs = {}
 
-    </div>
-</header>
 
-<main class="container">
+def detect_platform(url: str):
+    host = urlparse(url).hostname
 
-<section class="hero">
+    if not host:
+        return None
 
-    <h1>
-        Download Your<br>
-        <span class="gradient">Videos</span>
-    </h1>
+    host = host.lower()
 
-    <p>
-        Enter a supported video URL and we'll help you access
-        content you're authorized to download.
-    </p>
+    for platform, domains in SUPPORTED_PLATFORMS.items():
 
-    <div class="downloader">
+        if host in domains:
+            return platform
 
-        <div class="input-row">
+        for domain in domains:
+            if host.endswith("." + domain):
+                return platform
 
-            <input
-                id="urlInput"
-                class="url-input"
-                type="url"
-                placeholder="Paste video URL here..."
-                autocomplete="off"
-            >
+    return None
 
-            <button
-                id="pasteBtn"
-                class="paste-btn"
-                type="button">
-                Paste
-            </button>
 
-            <button
-                id="downloadBtn"
-                class="download-btn"
-                type="button">
-                Download
-            </button>
-
-        </div>
-
-        <div class="platforms">
-
-            <div class="platform">▶ YouTube</div>
-            <div class="platform">f Facebook</div>
-            <div class="platform">♪ TikTok</div>
-
-        </div>
-
-        <div
-            id="verification"
-            class="verification">
-
-            <label>
-
-                <input
-                    id="permissionCheck"
-                    type="checkbox"
-                >
-
-                <span>
-                    I confirm that I own this video or have permission
-                    from the copyright owner to download it.
-                </span>
-
-            </label>
-
-        </div>
-
-        <div
-            id="status"
-            class="status">
-        </div>
-
-    </div>
-
-</section>
-
-
-<section class="features">
-
-    <div class="feature">
-
-        <div class="feature-icon">⚡</div>
-
-        <h3>Fast</h3>
-
-        <p>
-            A simple interface designed to make the process
-            quick and easy.
-        </p>
-
-    </div>
-
-
-    <div class="feature">
-
-        <div class="feature-icon">🔒</div>
-
-        <h3>Permission First</h3>
-
-        <p>
-            Downloads require confirmation that you have
-            the necessary rights or permission.
-        </p>
-
-    </div>
-
-
-    <div class="feature">
-
-        <div class="feature-icon">📱</div>
-
-        <h3>Works Everywhere</h3>
-
-        <p>
-            Designed for phones, tablets and desktop browsers.
-        </p>
-
-    </div>
-
-</section>
-
-
-<div class="notice">
-
-    Only download videos that you own or have permission to download.
-    This service does not bypass DRM, private-content restrictions,
-    authentication controls, or other technical access restrictions.
-
-</div>
-
-</main>
-
-
-<footer>
-
-    © 2026 Universal Downloader
-
-</footer>
-
-
-<script>
-
-const API_URL =
-    "https://jarvis-iu3f.onrender.com/api/download";
-
-const urlInput =
-    document.getElementById("urlInput");
-
-const pasteBtn =
-    document.getElementById("pasteBtn");
-
-const downloadBtn =
-    document.getElementById("downloadBtn");
-
-const verification =
-    document.getElementById("verification");
-
-const permissionCheck =
-    document.getElementById("permissionCheck");
-
-const status =
-    document.getElementById("status");
-
-
-function detectPlatform(url) {
-
-    const value = url.toLowerCase();
-
-    if (
-        value.includes("youtube.com") ||
-        value.includes("youtu.be")
-    ) {
-        return "youtube";
+@app.get("/")
+def root():
+    return {
+        "service": "Universal Downloader API",
+        "status": "online",
+        "version": "1.1.0"
     }
 
-    if (
-        value.includes("facebook.com") ||
-        value.includes("fb.watch")
-    ) {
-        return "facebook";
+
+@app.get("/api/health")
+def health():
+    return {
+        "status": "ok",
+        "time": datetime.now(timezone.utc).isoformat()
     }
 
-    if (
-        value.includes("tiktok.com")
-    ) {
-        return "tiktok";
+
+@app.post("/api/download")
+def create_download(request: DownloadRequest):
+
+    if not request.permission_confirmed:
+        raise HTTPException(
+            status_code=400,
+            detail="Permission confirmation is required."
+        )
+
+    detected_platform = detect_platform(str(request.url))
+
+    if not detected_platform:
+        raise HTTPException(
+            status_code=400,
+            detail="Unsupported video URL."
+        )
+
+    if detected_platform != request.platform.lower():
+        raise HTTPException(
+            status_code=400,
+            detail="Platform does not match the URL."
+        )
+
+    job_id = uuid.uuid4().hex
+
+    jobs[job_id] = {
+        "job_id": job_id,
+        "platform": detected_platform,
+        "url": str(request.url),
+        "status": "queued",
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "message": "Download job created."
     }
 
-    return null;
-}
-
-
-function showStatus(message, type = "info") {
-
-    status.textContent = message;
-
-    status.className =
-        "status active " + type;
-}
-
-
-function checkUrl() {
-
-    const url =
-        urlInput.value.trim();
-
-    if (!url) {
-
-        verification.classList.remove("active");
-        status.className = "status";
-
-        return;
+    return {
+        "success": True,
+        "job_id": job_id,
+        "platform": detected_platform,
+        "status": "queued",
+        "message": "Download job created successfully."
     }
 
-    const platform =
-        detectPlatform(url);
 
-    if (!platform) {
+@app.get("/api/status/{job_id}")
+def get_status(job_id: str):
 
-        verification.classList.remove("active");
+    job = jobs.get(job_id)
 
-        showStatus(
-            "Please enter a supported YouTube, Facebook, or TikTok URL.",
-            "error"
-        );
+    if not job:
+        raise HTTPException(
+            status_code=404,
+            detail="Job not found."
+        )
 
-        return;
+    return {
+        "success": True,
+        **job
     }
-
-    verification.classList.add("active");
-
-    permissionCheck.checked = false;
-
-    const platformName =
-        platform.charAt(0).toUpperCase() +
-        platform.slice(1);
-
-    showStatus(
-        platformName +
-        " URL detected. Please confirm your download permission.",
-        "info"
-    );
-}
-
-
-urlInput.addEventListener(
-    "input",
-    checkUrl
-);
-
-
-pasteBtn.addEventListener(
-    "click",
-    async () => {
-
-        try {
-
-            const text =
-                await navigator.clipboard.readText();
-
-            if (!text) {
-
-                showStatus(
-                    "Your clipboard is empty.",
-                    "error"
-                );
-
-                return;
-            }
-
-            urlInput.value = text;
-
-            checkUrl();
-
-        } catch (error) {
-
-            showStatus(
-                "Clipboard access was blocked. Please paste the URL manually.",
-                "error"
-            );
-
-        }
-
-    }
-);
-
-
-downloadBtn.addEventListener(
-    "click",
-    async () => {
-
-        const url =
-            urlInput.value.trim();
-
-        if (!url) {
-
-            showStatus(
-                "Please paste a video URL first.",
-                "error"
-            );
-
-            return;
-        }
-
-
-        const platform =
-            detectPlatform(url);
-
-
-        if (!platform) {
-
-            showStatus(
-                "Only supported YouTube, Facebook, and TikTok URLs are accepted.",
-                "error"
-            );
-
-            return;
-        }
-
-
-        verification.classList.add("active");
-
-
-        if (!permissionCheck.checked) {
-
-            showStatus(
-                "Please confirm that you own the video or have permission to download it.",
-                "error"
-            );
-
-            return;
-        }
-
-
-        downloadBtn.disabled = true;
-
-        downloadBtn.textContent =
-            "Connecting...";
-
-
-        showStatus(
-            "Connecting to the download server...",
-            "info"
-        );
-
-
-        try {
-
-            const response =
-                await fetch(
-                    API_URL,
-                    {
-                        method: "POST",
-
-                        headers: {
-                            "Content-Type":
-                                "application/json"
-                        },
-
-                        body: JSON.stringify({
-                            url: url,
-                            platform: platform,
-                            permission_confirmed: true
-                        })
-                    }
-                );
-
-
-            let data;
-
-            try {
-
-                data =
-                    await response.json();
-
-            } catch {
-
-                throw new Error(
-                    "The server returned an invalid response."
-                );
-
-            }
-
-
-            if (!response.ok) {
-
-                throw new Error(
-                    data.detail ||
-                    "The server rejected the request."
-                );
-
-            }
-
-
-            showStatus(
-                "Request accepted! Job ID: " +
-                data.job_id,
-                "success"
-            );
-
-
-            console.log(
-                "Backend response:",
-                data
-            );
-
-
-        } catch (error) {
-
-            console.error(
-                "Download API error:",
-                error
-            );
-
-
-            showStatus(
-                "Unable to connect to the download server. Please try again.",
-                "error"
-            );
-
-        } finally {
-
-            downloadBtn.disabled = false;
-
-            downloadBtn.textContent =
-                "Download";
-
-        }
-
-    }
-);
-
-</script>
-
-</body>
-</html>
