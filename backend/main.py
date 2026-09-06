@@ -104,14 +104,8 @@ def process_download(job_id: str, url: str):
 
         options = {
             "outtmpl": output_template,
-
-            # Prefer MP4 when available.
             "format": "best[ext=mp4]/best",
-
-            # Only process one video.
             "noplaylist": True,
-
-            # Keep Render logs clean.
             "quiet": True,
             "no_warnings": True,
         }
@@ -125,10 +119,6 @@ def process_download(job_id: str, url: str):
 
             filename = ydl.prepare_filename(info)
 
-
-        # ----------------------------------------------------
-        # Find the downloaded file if the extension changed.
-        # ----------------------------------------------------
 
         if not os.path.exists(filename):
 
@@ -145,10 +135,6 @@ def process_download(job_id: str, url: str):
                 filename = possible_files[0]
 
 
-        # ----------------------------------------------------
-        # Make sure the file actually exists.
-        # ----------------------------------------------------
-
         if not os.path.exists(filename):
 
             raise Exception(
@@ -156,14 +142,8 @@ def process_download(job_id: str, url: str):
             )
 
 
-        # ----------------------------------------------------
-        # Successful job.
-        # ----------------------------------------------------
-
         jobs[job_id]["status"] = "completed"
-
         jobs[job_id]["file"] = filename
-
         jobs[job_id]["title"] = info.get(
             "title",
             "Facebook Video"
@@ -173,7 +153,6 @@ def process_download(job_id: str, url: str):
     except Exception as e:
 
         jobs[job_id]["status"] = "failed"
-
         jobs[job_id]["error"] = str(e)
 
 
@@ -211,10 +190,6 @@ def health():
 @app.post("/api/download")
 def create_download(request: DownloadRequest):
 
-    # --------------------------------------------------------
-    # Permission check
-    # --------------------------------------------------------
-
     if not request.permission_confirmed:
 
         raise HTTPException(
@@ -223,10 +198,6 @@ def create_download(request: DownloadRequest):
         )
 
 
-    # --------------------------------------------------------
-    # Platform check
-    # --------------------------------------------------------
-
     if request.platform.lower() != "facebook":
 
         raise HTTPException(
@@ -234,10 +205,6 @@ def create_download(request: DownloadRequest):
             detail="Only Facebook videos are currently supported."
         )
 
-
-    # --------------------------------------------------------
-    # URL check
-    # --------------------------------------------------------
 
     video_url = str(request.url)
 
@@ -249,61 +216,33 @@ def create_download(request: DownloadRequest):
         )
 
 
-    # --------------------------------------------------------
-    # Create job ID
-    # --------------------------------------------------------
-
     job_id = uuid.uuid4().hex
 
 
     jobs[job_id] = {
-
         "job_id": job_id,
-
         "platform": "facebook",
-
         "url": video_url,
-
         "status": "queued",
-
         "created_at":
             datetime.now(timezone.utc).isoformat()
     }
 
 
-    # --------------------------------------------------------
-    # Start background download
-    # --------------------------------------------------------
-
     thread = threading.Thread(
-
         target=process_download,
-
-        args=(
-            job_id,
-            video_url
-        ),
-
+        args=(job_id, video_url),
         daemon=True
     )
 
     thread.start()
 
 
-    # --------------------------------------------------------
-    # Return job information
-    # --------------------------------------------------------
-
     return {
-
         "success": True,
-
         "job_id": job_id,
-
         "platform": "facebook",
-
         "status": "queued",
-
         "message":
             "Facebook download job started."
     }
@@ -322,52 +261,27 @@ def get_status(job_id: str):
     if not job:
 
         raise HTTPException(
-
             status_code=404,
-
             detail="Job not found."
         )
 
 
     response = {
-
         "success": True,
-
-        "job_id":
-            job["job_id"],
-
-        "platform":
-            job["platform"],
-
-        "status":
-            job["status"],
-
-        "created_at":
-            job["created_at"]
+        "job_id": job["job_id"],
+        "platform": job["platform"],
+        "status": job["status"],
+        "created_at": job["created_at"]
     }
 
 
-    # --------------------------------------------------------
-    # Add title when available.
-    # --------------------------------------------------------
-
     if "title" in job:
-
         response["title"] = job["title"]
 
 
-    # --------------------------------------------------------
-    # Add error when download fails.
-    # --------------------------------------------------------
-
     if "error" in job:
-
         response["error"] = job["error"]
 
-
-    # --------------------------------------------------------
-    # Add download URL when complete.
-    # --------------------------------------------------------
 
     if job["status"] == "completed":
 
@@ -392,9 +306,7 @@ def download_file(job_id: str):
     if not job:
 
         raise HTTPException(
-
             status_code=404,
-
             detail="Job not found."
         )
 
@@ -402,9 +314,7 @@ def download_file(job_id: str):
     if job["status"] != "completed":
 
         raise HTTPException(
-
             status_code=400,
-
             detail="File is not ready."
         )
 
@@ -415,9 +325,7 @@ def download_file(job_id: str):
     if not filename:
 
         raise HTTPException(
-
             status_code=404,
-
             detail="Downloaded file was not found."
         )
 
@@ -425,18 +333,31 @@ def download_file(job_id: str):
     if not os.path.exists(filename):
 
         raise HTTPException(
-
             status_code=404,
-
             detail="Downloaded file no longer exists."
         )
 
 
+    # Send the correct video MIME type and a real video filename.
+    extension = os.path.splitext(filename)[1].lower()
+
+    media_types = {
+        ".mp4": "video/mp4",
+        ".webm": "video/webm",
+        ".mkv": "video/x-matroska",
+        ".mov": "video/quicktime",
+        ".avi": "video/x-msvideo",
+    }
+
+    media_type = media_types.get(
+        extension,
+        "application/octet-stream"
+    )
+
+    download_name = f"Facebook_Video{extension}"
+
     return FileResponse(
-
         filename,
-
-        filename=os.path.basename(filename),
-
-        media_type="application/octet-stream"
+        filename=download_name,
+        media_type=media_type
     )
