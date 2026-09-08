@@ -196,6 +196,42 @@ def health():
 
 
 # ============================================================
+# REGISTER SECONDARY WORKER
+# ============================================================
+
+class WorkerRegistration(BaseModel):
+    url: HttpUrl
+    token: str
+
+
+@app.post("/api/worker/register")
+def register_worker(request: WorkerRegistration):
+
+    if not PC_WORKER_TOKEN:
+        raise HTTPException(
+            status_code=503,
+            detail="Worker registration is not configured."
+        )
+
+    if request.token != PC_WORKER_TOKEN:
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid worker token."
+        )
+
+    pc_worker["url"] = str(request.url).rstrip("/")
+    pc_worker["last_seen"] = datetime.now(timezone.utc).isoformat()
+
+    return {
+        "success": True,
+        "worker": "pc",
+        "status": "registered",
+        "url": pc_worker["url"],
+        "last_seen": pc_worker["last_seen"]
+    }
+
+
+# ============================================================
 # CREATE DOWNLOAD JOB
 # ============================================================
 
