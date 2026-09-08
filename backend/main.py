@@ -7,6 +7,7 @@ from datetime import datetime, timezone
 import uuid
 import os
 import threading
+import requests
 import yt_dlp
 
 
@@ -97,6 +98,32 @@ def is_facebook_url(url: str):
             return True
 
     return False
+
+
+# ============================================================
+# FORWARD DOWNLOAD TO SECONDARY PC
+# ============================================================
+
+def forward_to_pc(url: str):
+
+    worker_url = pc_worker.get("url")
+
+    if not worker_url:
+        raise Exception("No secondary PC worker is registered.")
+
+    response = requests.post(
+        f"{worker_url}/api/download",
+        json={
+            "url": url,
+            "platform": "facebook",
+            "permission_confirmed": True
+        },
+        timeout=15
+    )
+
+    response.raise_for_status()
+
+    return response.json()
 
 
 # ============================================================
