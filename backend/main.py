@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Header
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, HttpUrl
@@ -271,6 +271,71 @@ def worker_status():
         "registered": bool(pc_worker["url"]),
         "url": pc_worker["url"],
         "last_seen": pc_worker["last_seen"]
+    }
+
+
+# ============================================================
+# SECURE SECONDARY WORKER DOWNLOAD
+# ============================================================
+
+@app.post("/api/worker/download")
+def worker_download(
+    request: DownloadRequest,
+    x_worker_token: str = Header(default="")
+):
+
+    if not PC_WORKER_TOKEN:
+        raise HTTPException(
+            status_code=503,
+            detail="PC worker token is not configured."
+        )
+
+    if x_worker_token != PC_WORKER_TOKEN:
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid worker token."
+        )
+
+    if not request.permission_confirmed:
+        raise HTTPException(
+            status_code=400,
+            detail="Permission confirmation is required."
+        )
+
+    if request.platform.lower() != "facebook":
+        raise HTTPException(
+            status_code=400,
+            detail="Only Facebook downloads are supported."
+        )
+
+    if not is_facebook_url(str(request.url)):
+        raise HTTPException(
+            status_code=400,
+            detail="Only Facebook URLs are supported."
+        )
+
+    job_id = uuid.uuid4().hex
+
+    jobs[job_id] = {
+        "status": "queued",
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "url": str(request.url),
+        "platform": "facebook"
+    }
+
+    thread = threading.Thread(
+        target=process_download,
+        args=(job_id, str(request.url)),
+        daemon=True
+    )
+
+    thread.start()
+
+    return {
+        "success": True,
+        "job_id": job_id,
+        "status": "queued",
+        "worker": "pc"
     }
 
 
