@@ -232,6 +232,22 @@ def register_worker(request: WorkerRegistration):
 
 
 # ============================================================
+# SECONDARY WORKER STATUS
+# ============================================================
+
+@app.get("/api/worker/status")
+def worker_status():
+
+    return {
+        "success": True,
+        "worker": "pc",
+        "registered": bool(pc_worker["url"]),
+        "url": pc_worker["url"],
+        "last_seen": pc_worker["last_seen"]
+    }
+
+
+# ============================================================
 # CREATE DOWNLOAD JOB
 # ============================================================
 
