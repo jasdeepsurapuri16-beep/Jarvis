@@ -111,6 +111,31 @@ def forward_to_pc(url: str):
     if not worker_url:
         raise Exception("No secondary PC worker is registered.")
 
+    if not PC_WORKER_TOKEN:
+        raise Exception("PC worker token is not configured.")
+
+    response = requests.post(
+        f"{worker_url}/api/worker/download",
+        json={
+            "url": url,
+            "platform": "facebook",
+            "permission_confirmed": True
+        },
+        headers={
+            "X-Worker-Token": PC_WORKER_TOKEN
+        },
+        timeout=15
+    )
+
+    response.raise_for_status()
+
+    return response.json()
+
+    worker_url = pc_worker.get("url")
+
+    if not worker_url:
+        raise Exception("No secondary PC worker is registered.")
+
     response = requests.post(
         f"{worker_url}/api/download",
         json={
