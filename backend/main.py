@@ -46,6 +46,18 @@ os.makedirs(DOWNLOAD_DIR, exist_ok=True)
 
 jobs = {}
 
+# ============================================================
+# SECONDARY WORKER
+# ============================================================
+
+PC_WORKER_URL = os.getenv("PC_WORKER_URL", "").rstrip("/")
+PC_WORKER_TOKEN = os.getenv("PC_WORKER_TOKEN", "")
+
+pc_worker = {
+    "url": PC_WORKER_URL,
+    "last_seen": None
+}
+
 
 # ============================================================
 # REQUEST MODEL
