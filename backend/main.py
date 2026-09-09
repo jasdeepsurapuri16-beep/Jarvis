@@ -438,14 +438,11 @@ def get_status(job_id: str):
 
     job = jobs.get(job_id)
 
-
     if not job:
-
         raise HTTPException(
             status_code=404,
             detail="Job not found."
         )
-
 
     response = {
         "success": True,
@@ -455,8 +452,7 @@ def get_status(job_id: str):
         "created_at": job["created_at"]
     }
 
-
-       if "title" in job:
+    if "title" in job:
         response["title"] = job["title"]
 
     if "error" in job:
