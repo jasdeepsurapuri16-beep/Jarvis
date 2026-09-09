@@ -465,10 +465,9 @@ def get_status(job_id: str):
 
 
     if job["status"] == "completed":
-
-        response["download_url"] = (
-            f"/api/file/{job_id}"
-        )
+    response["download_url"] = (
+        f"https://jarvis-iu3f.onrender.com/api/file/{job_id}"
+    )
 
 
     return response
