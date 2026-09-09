@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException, Header
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, RedirectResponse
 from pydantic import BaseModel, HttpUrl
 from urllib.parse import urlparse
 from datetime import datetime, timezone
@@ -58,6 +58,16 @@ pc_worker = {
     "url": PC_WORKER_URL,
     "last_seen": None
 }
+
+
+# ============================================================
+# DOWNLOAD LOAD BALANCER
+# ============================================================
+
+download_counter = 0
+download_counter_lock = threading.Lock()
+
+PC_JOB_PERCENTAGE = 30
 
 
 # ============================================================
@@ -149,6 +159,25 @@ def forward_to_pc(url: str):
     response.raise_for_status()
 
     return response.json()
+
+
+# ============================================================
+# CHOOSE DOWNLOAD WORKER
+# ============================================================
+
+def choose_worker():
+
+    global download_counter
+
+    with download_counter_lock:
+        download_counter += 1
+
+        position = download_counter % 10
+
+    if position in (4, 8, 0) and pc_worker.get("url"):
+        return "pc"
+
+    return "render"
 
 
 # ============================================================
@@ -299,70 +328,6 @@ def worker_status():
     }
 
 
-# ============================================================
-# SECURE SECONDARY WORKER DOWNLOAD
-# ============================================================
-
-@app.post("/api/worker/download")
-def worker_download(
-    request: DownloadRequest,
-    x_worker_token: str = Header(default="")
-):
-
-    if not PC_WORKER_TOKEN:
-        raise HTTPException(
-            status_code=503,
-            detail="PC worker token is not configured."
-        )
-
-    if x_worker_token != PC_WORKER_TOKEN:
-        raise HTTPException(
-            status_code=401,
-            detail="Invalid worker token."
-        )
-
-    if not request.permission_confirmed:
-        raise HTTPException(
-            status_code=400,
-            detail="Permission confirmation is required."
-        )
-
-    if request.platform.lower() != "facebook":
-        raise HTTPException(
-            status_code=400,
-            detail="Only Facebook downloads are supported."
-        )
-
-    if not is_facebook_url(str(request.url)):
-        raise HTTPException(
-            status_code=400,
-            detail="Only Facebook URLs are supported."
-        )
-
-    job_id = uuid.uuid4().hex
-
-    jobs[job_id] = {
-        "status": "queued",
-        "created_at": datetime.now(timezone.utc).isoformat(),
-        "url": str(request.url),
-        "platform": "facebook"
-    }
-
-    thread = threading.Thread(
-        target=process_download,
-        args=(job_id, str(request.url)),
-        daemon=True
-    )
-
-    thread.start()
-
-    return {
-        "success": True,
-        "job_id": job_id,
-        "status": "queued",
-        "worker": "pc"
-    }
-
 
 # ============================================================
 # CREATE DOWNLOAD JOB
@@ -410,13 +375,49 @@ def create_download(request: DownloadRequest):
     }
 
 
-    thread = threading.Thread(
-        target=process_download,
-        args=(job_id, video_url),
-        daemon=True
-    )
+       worker = choose_worker()
 
-    thread.start()
+    if worker == "pc":
+        try:
+            pc_result = forward_to_pc(video_url)
+
+            jobs[job_id]["worker"] = "pc"
+            jobs[job_id]["pc_job_id"] = pc_result["job_id"]
+
+            return {
+                "success": True,
+                "job_id": job_id,
+                "platform": "facebook",
+                "status": "queued",
+                "worker": "pc",
+                "message": "Download job sent to PC worker."
+            }
+
+        except Exception as e:
+            worker = "render"
+            jobs[job_id]["worker"] = "render"
+            jobs[job_id]["worker_error"] = str(e)
+
+    if worker == "render":
+
+        jobs[job_id]["worker"] = "render"
+
+        thread = threading.Thread(
+            target=process_download,
+            args=(job_id, video_url),
+            daemon=True
+        )
+
+        thread.start()
+
+        return {
+            "success": True,
+            "job_id": job_id,
+            "platform": "facebook",
+            "status": "queued",
+            "worker": "render",
+            "message": "Facebook download job started."
+        }
 
 
     return {
@@ -435,14 +436,63 @@ def create_download(request: DownloadRequest):
 
 @app.get("/api/status/{job_id}")
 def get_status(job_id: str):
-
     job = jobs.get(job_id)
 
-    if not job:
+     if not job:
         raise HTTPException(
             status_code=404,
             detail="Job not found."
         )
+    # PC worker job
+    if job.get("worker") == "pc":
+
+        pc_job_id = job.get("pc_job_id")
+        worker_url = pc_worker.get("url")
+
+        if not pc_job_id or not worker_url:
+            return {
+                "success": True,
+                "job_id": job_id,
+                "status": "failed",
+                "error": "PC worker is unavailable."
+            }
+
+        try:
+            pc_response = requests.get(
+                f"{worker_url}/api/status/{pc_job_id}",
+                timeout=10
+            )
+
+            pc_response.raise_for_status()
+            pc_status = pc_response.json()
+
+        except Exception:
+            return {
+                "success": True,
+                "job_id": job_id,
+                "status": "processing",
+                "worker": "pc"
+            }
+
+        response = {
+            "success": True,
+            "job_id": job_id,
+            "platform": "facebook",
+            "status": pc_status.get("status"),
+            "worker": "pc",
+            "created_at": job["created_at"]
+        }
+
+        if "title" in pc_status:
+            response["title"] = pc_status["title"]
+
+        if "error" in pc_status:
+            response["error"] = pc_status["error"]
+
+        if pc_status.get("status") == "completed":
+            response["download_url"] = f"/api/file/{job_id}"
+
+        return response
 
     response = {
         "success": True,
@@ -474,9 +524,22 @@ def download_file(job_id: str):
 
     job = jobs.get(job_id)
 
+    # PC worker file
+    if job and job.get("worker") == "pc":
+        worker_url = pc_worker.get("url")
+        pc_job_id = job.get("pc_job_id")
+
+        if not worker_url or not pc_job_id:
+            raise HTTPException(
+                status_code=404,
+                detail="PC worker file is unavailable."
+            )
+
+        return RedirectResponse(
+            url=f"{worker_url}/api/file/{pc_job_id}"
+        )
 
     if not job:
-
         raise HTTPException(
             status_code=404,
             detail="Job not found."
