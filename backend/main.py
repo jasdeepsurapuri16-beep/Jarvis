@@ -375,7 +375,7 @@ def create_download(request: DownloadRequest):
     }
 
 
-       worker = choose_worker()
+    worker = choose_worker()
 
     if worker == "pc":
         try:
